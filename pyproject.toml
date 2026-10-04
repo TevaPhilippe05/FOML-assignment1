@@ -1,26 +1,21 @@
 [project]
 name = "foml-assignment1"
 version = "0.1.0"
-description = "Add your description here"
+description = "First assignment for the Foundation of Machine Learning and Deep Learning subject"
 readme = "README.md"
 authors = [
-    { name = "TevaPhilippe05", email = "philippe.teva.pro@gmail.com" }
+    { name = "TevaPhilippe05", email = "philippe.teva.pro@gmail.com" },
+    { name = "AlvaroCrespo02", email = "acrespogra@gmail.com" }
 ]
 requires-python = ">=3.13"
 dependencies = [
     "jupyter>=1.1.1",
     "kagglehub>=1.0.2",
     "matplotlib>=3.11.2",
+    "seaborn>=0.13.2",
     "numpy>=2.5.3",
-    "panda>=0.3.1",
+    "pandas>=2.0.0",
     "scikit-learn>=1.9.1",
     "torch>=2.14.1",
     "torchvision>=0.29.1",
 ]
-
-[project.scripts]
-foml-assignment1 = "foml_assignment1:main"
-
-[build-system]
-requires = ["uv_build>=0.12.18,<0.13.0"]
-build-backend = "uv_build"
