@@ -1,0 +1,117 @@
+#set text(lang: "fr")
+
+#set par(
+    justify: true
+)
+
+#set heading(numbering: "1.")
+
+#align(center)[
+  #text(size: 20pt, weight: "bold")[
+    Assignment 1
+    ]
+
+    #v(0.1em)
+
+    #text(size: 15pt, weight: "bold")[
+    Image Classification with Neural Networks
+    ]
+    
+  #v(0.1em)
+  Teva Philippe & Alvaro Crespo
+]
+
+#v(1em)
+
+= Introduction
+
+#v(1em)
+
+TODO
+
+= Dataset Analysis
+
+#v(1em)
+
+TODO by Alvaro
+
+= Model description
+
+#v(1em)
+
+TODO by Teva
+
+= Process and Analysis
+
+#v(1em)
+
+In french for now but i'll translate later don't worry
+
+Tout d'abord nous avons fait une selection de 3 sports similaires et de 3 sports differents
+
+- football (191 files)
+- nascar racing (189 file)
+- olympic wrestling (167 files)
+
+#table(
+  columns: (1fr, 1fr),
+  inset: 10pt,
+  align: horizon,
+  table.header(
+    [*3 differents sports*], [*3 similar sport*]
+  ),
+  [
+    football (191 files)
+  ],
+  [
+    football (191 files)
+  ],
+  [
+    nascar racing (189 file)
+  ],
+  [
+    rugby 166 (files)
+  ],
+  [
+    olympic wrestling (167 files)
+  ],
+  [
+    ampute football (112 files)
+  ],
+)
+
+6 different :
+* football (191 files)
+* nascar racing (189 file)
+* olympic wrestling (167 files)
+* surf (142 files)
+* archery (132 files)
+* arm wrestling (99 files)
+
+20 sport :
+* football
+* nascar racing
+* olympic wrestling
+* surf
+* archery
+* arm wrestling
+* swimming
+* amputee footbal
+* skydiving
+* sky surfing
+* ski jumping
+* rowing
+* pommel horse
+* pole dancing
+* pole climbing
+* formula 1 racing
+* boxing
+* baton twirling
+* axe throwing
+* water cycling
+
+= Conclusion
+
+#v(1em)
+
+TODO
