@@ -1,2 +1,6 @@
+# uv
+.venv/
+uv.lock
+
 src/*
 notebook/data_small/*
