@@ -57,6 +57,10 @@ Due to the amount of classes, we decided to remove some of them in order to carr
 
 Class choice for each experiment was based on class distribution, prioriticing classese with higher amount of images.
 
+== Data Quality & Characteristics
+
+== Class Specific Insights
+
 = Model description
 
 #v(1em)
