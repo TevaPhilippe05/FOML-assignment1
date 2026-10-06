@@ -33,7 +33,33 @@ TODO
 
 #v(1em)
 
-TODO by Alvaro
+The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. It includes 14492 images, divided into 100 different classes. The images are all 224x224 pixels, and they all use JPG format. The classes are not balanced, with a range in between 69 and 201 images.
+
+[Put class distribution image here]
+
+The dataset is distributed by default in three folders:
+- train/ has 13493 files
+- test/ has 500 files
+- valid/ has 500 files
+There is also a CSV file with basic information:
+
+[Put head() of dataframe]
+
+And additionally there is HDF5 file ('EfficientNetB0-100-(224 X 224)- 98.40.h5') that is not mentioned in the dataset documentation, but is asumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions.
+
+The author of the dataset claims that "This dataset was carefully created so that the region of interest (ROI) in this case the sport occupies approximately 50% of the pixels in the image. As a consequence even models of moderate complexity should achieve training and validation accuracies in the high 90's."
+
+Due to the amount of classes, we decided to remove some of them in order to carry out our analysis. We decided to test some different combinations:
+- 3 very different classes [which ones]
+- 3 similar classes [which ones]
+- 6 classes [which ones]
+- 100 classes??
+
+Class choice for each experiment was based on class distribution, prioriticing classese with higher amount of images.
+
+== Data Quality & Characteristics
+
+== Class Specific Insights
 
 = Model description
 
