@@ -1,14 +1,8 @@
 import os
-import torch
-import shutil
+
 import kagglehub
-import numpy as np
-from torch import nn
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
 import pandas as pd
-from sklearn.metrics import confusion_matrix
+from torchvision import datasets, transforms
 
 # Set image size
 IMG_SIZE = 224
