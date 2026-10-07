@@ -65,76 +65,341 @@ Class choice for each experiment was based on class distribution, prioriticing c
 
 #v(1em)
 
-TODO by Teva
-
-= Process and Analysis
+== Data loading and preparation
 
 #v(1em)
 
-In french for now but i'll translate later don't worry
+- The dataset is downloaded with `kagglehub`, which stores it in a cache folder on the machine.
 
-Tout d'abord nous avons fait une selection de 3 sports similaires et de 3 sports differents
+- Each image goes through a transformation: we kept their original size of 224×224 pixels, then converted them to tensors, with pixel values between 0 and 1. For the grayscale version, a `Grayscale` step is added: the image then has only one channel instead of three (red, green, blue), which divides the number of input values by three.
 
-- football (191 files)
-- nascar racing (189 file)
-- olympic wrestling (167 files)
+A 64×64 pixel version was also prepared for a later test.
+
+- A `SubsetImageFolder` class (generated) allows us to keep only some sports:
+
+First, we selected 3 similar sports and 3 different sports.
 
 #table(
   columns: (1fr, 1fr),
   inset: 10pt,
   align: horizon,
   table.header(
-    [*3 differents sports*], [*3 similar sport*]
+    [*3 different sports*], [*3 similar sports*]
   ),
   [
-    football (191 files)
+    Football (191 files)
   ],
   [
-    football (191 files)
+    Football (191 files)
   ],
   [
-    nascar racing (189 file)
+    Nascar racing (189 files)
   ],
   [
-    rugby 166 (files)
+    Rugby (166 files)
   ],
   [
-    olympic wrestling (167 files)
+    Olympic wrestling (167 files)
   ],
   [
-    ampute football (112 files)
+    Ampute football (112 files)
   ],
 )
 
-6 different :
-* football (191 files)
-* nascar racing (189 file)
-* olympic wrestling (167 files)
-* surfing (142 files)
-* archery (132 files)
-* arm wrestling (99 files)
+We also chose a subset of 6 different sports, then subsets of 12 and 20 sports, some of them different and some of them similar.
 
-20 sport :
-* football
-* nascar racing
-* olympic wrestling
-* surfing
-* archery
-* arm wrestling
-* swimming
-* ampute football
-* skydiving
-* sky surfing
-* ski jumping
-* rowing
-* pommel horse
-* pole dancing
-* pole climbing
-* formula 1 racing
-* boxing
-* baton twirling
-* axe throwing
-* water cycling
+== The model
+
+#v(1em)
+
+The `Net` class is an MLP (fully connected neural network) for which we can choose:
+- the number and size of the hidden layers (`hidden_sizes`, for example `[128, 64]`);
+- the number of output classes;
+- the activation function, among the three seen in class: *ReLU*, *tanh* and *sigmoid*;
+- the regularization (see below);
+- an optional convolution part placed before the MLP.
+
+If no convolution is given, the image is simply flattened into a long vector of pixels, then sent to the MLP. Otherwise, the image first goes through the convolution, and the result is then flattened.
+
+== The convolution
+
+#v(1em)
+
+- The `Conv` class contains a convolution layer, a ReLU, then a 2×2 pooling. The padding keeps the same image size. We can choose the number of input channels (1 for grayscale, 3 for color), the number of filters, the kernel and the type of pooling (*max* or *average*).
+
+- The `Conv2` class applies two `Conv` blocks one after the other. The second block uses twice as many filters as the first one.
+
+== Regularizations
+
+#v(1em)
+
+Four regularizations are available, chosen with the `regularization` parameter:
+- *L1*, *Weight decay*, *Dropout* and *Early stopping*
+
+== Optimizers and scheduler
+
+#v(1em)
+
+Two optimizers are available:
+- *SGD* and *Adam*
+
+A *Step* scheduler can be added: it divides the learning rate by 2 every 10 epochs.
+
+== Training and visualization
+
+#v(1em)
+
+- `train`: at each epoch, the model is trained on the training set and then evaluated on the validation set. The function records the loss and the accuracy (training and validation) as well as the confusion matrix of each epoch.
+
+- `run_training`: creates the DataLoaders (batches of 64 images), builds the convolution, creates the model and starts the training.
+
+- `plot_metrics`: displays the accuracy and loss curves (training and validation) and the confusion matrices of the requested epochs.
+
+- `nb_parameters`: counts the number of parameters of the model.
+
+Note that the seed is set to 42 to ensure that the results are comparable.
+
+= Process and Analysis
+
+#v(1em)
+
+= Process and Analysis
+
+#v(1em)
+
+For the process, we looked for the ideal parameters on a subset of *12 sports in grayscale*, adding the elements one by one.
+
+Once these parameters were found, we applied them to our other subsets. The idea was to compare the behaviour of such a model on 3 different sports and on 3 similar sports, between the use of grayscale images and color images (we will see an example with 6 sports), and finally with a growing number of classes (20 and 100 sports).
+
+To compare two models, we mainly look at the *validation loss*. The validation accuracy is computed on few images (5 images per class): it therefore varies a lot from one epoch to another.
+
+== Choice of the hidden layers
+
+#v(1em)
+
+We started without convolution, with SGD, a learning rate of 0.001 and 20 epochs: the image is simply flattened and then given to the MLP.
+
+#table(
+  columns: (1fr, 1fr, 1fr),
+  inset: 8pt,
+  align: horizon,
+  table.header([*Hidden layers*], [*Parameters*], [*Minimum validation loss*]),
+  [128], [6.4 M], [2.11],
+  [512, 128], [25.8 M], [2.12],
+  [128, 64], [6.4 M], [2.13],
+  [256, 128], [12.9 M], [2.16],
+  [64, 32], [3.2 M], [2.18],
+  [128, 64, 32], [6.4 M], [2.24],
+)
+
+The results are very close. The models are still learning at the end of the 20 epochs. Our model was running on the GPU of the virtual machines, but given the number of images and parameters, it still took a long time to run. This is why we stayed at 20 epochs. We kept *two layers of 128 and 64 neurons*, a good compromise between results and number of parameters.
+
+== Adding the convolution
+
+#v(1em)
+
+We then added a convolution layer (`Conv`), testing two filter sizes (3 and 7) and three numbers of filters (8, 16 and 32).
+
+#table(
+  columns: (1fr, 1fr, 1fr, 1fr),
+  inset: 8pt,
+  align: horizon,
+  table.header([*Kernel*], [*8 filters*], [*16 filters*], [*32 filters*]),
+  [3], [2.01], [1.95], [1.95],
+  [7], [2.01], [1.90], [1.91],
+)
+
+The convolution improves the results compared to the MLP alone. Going from 8 to 16 filters helps a little, but not from 16 to 32. Kernels of 3 and 7 give very similar results. However, the number of parameters increases very quickly with the number of filters (12.9 M with 8 filters, 25.7 M with 16, 51.4 M with 32). We therefore kept *8 filters and a kernel of 3* to stay at 12.9 M parameters.
+
+We also compared *max pooling* and *average pooling*, which were equivalent, and then the activation functions: ReLU (2.01) and tanh (1.99) give almost identical results, while sigmoid learns nothing (the loss stays at the level of a model answering at random). We kept max pooling and ReLU.
+
+Given the results, we could have kept tanh, but we know from theory that ReLU is better, so we preferred not to take any risks.
+
+== Optimizer and scheduler
+
+#v(1em)
+
+With SGD and 40 epochs, the model starts to overfit: the training loss keeps decreasing, while the validation loss stays around 2. At first, we started to regularize at this point. But we ran into difficulties that we will come back to later. This is why, in the end, we went directly to the optimizer and scheduler part.
+
+We replaced SGD with Adam, which adapts the weights, with the step scheduler, which divides the learning rate by 2 every 10 epochs.
+
+#table(
+  columns: (1fr, 1fr, 1fr),
+  inset: 8pt,
+  align: horizon,
+  table.header([*Configuration*], [*Minimum validation loss*], [*Validation accuracy (end)*]),
+  [SGD], [1.86], [about 33 %],
+  [Adam + scheduler], [1.64], [about 50 %],
+)
+
+The improvement is clear, and the validation loss is much more stable at the end of training, which matches the expected effect of the scheduler.
+
+#figure(
+  image("Assets/12c_adam_step.png", width: 85%),
+  caption: [12 sports in grayscale, Adam + scheduler: the model learns better, but the gap between training and validation remains large.]
+)
+
+== Regularization: no improvement
+
+#v(1em)
+
+The model still overfits: it reaches almost 100 % on the training set, but about 50 % on the validation set. We therefore tested the regularizations, with Adam and the scheduler.
+
+#table(
+  columns: (1fr, 1fr, 1fr),
+  inset: 8pt,
+  align: horizon,
+  table.header([*Regularization*], [*Value*], [*Minimum validation loss*]),
+  [None], [–], [1.64],
+  [Weight decay], [0.0001], [1.62],
+  [Weight decay], [0.001], [1.66],
+  [Weight decay], [0.01], [1.77],
+  [Weight decay], [0.1], [2.08],
+  [Dropout], [0.1], [1.78],
+  [Dropout], [0.3], [2.13],
+)
+
+No regularization really improves the model, or only very slightly. With stronger values, the gap between training and validation decreases, but the model learns less well, and with 0.1 or a dropout of 0.3, we turned overfitting into underfitting. Dropout leads to the same conclusion as weight decay.
+
+We also tried reducing the image size to 64×64 pixels. In that case, the model had far fewer parameters (1 M instead of 12.9 M) and overfitted less, but the validation loss was worse (1.87). By reducing the images, we lost details that are useful to recognize the sports.
+
+== A second convolution
+
+#v(1em)
+
+We then decided to add a second convolution layer (`Conv2`). Each pooling divides the image size again, so the first layer of the MLP becomes smaller (6.4 M parameters instead of 12.9 M), while keeping the images at 224×224.
+
+This is the clearest improvement: the minimum validation loss goes from 1.64 to *1.33* (around epoch 11), and the validation accuracy rises to about 55 %. On the other hand, the model learns much faster and reaches 100 % on the training set from around epoch 12. After that, the validation loss goes back up.
+
+#figure(
+  image("Assets/12c_conv2.png", width: 85%),
+  caption: [12 sports in grayscale with two convolutions: better results, but fast overfitting after epoch 11.]
+)
+
+We tried again to regularize this model with dropout (0.1), without improvement.
+
+ We therefore chose to use *early stopping* to stop training around the best moment. Our early stopping has a limitation: it stops 10 epochs after the best validation loss.
+
+*Our final configuration is therefore: two convolutions (8 then 16 filters, kernel of 3, max pooling), an MLP of 128 and 64 neurons with ReLU, Adam with the scheduler, and early stopping.*
+
+== Comparison of the subsets
+
+#v(1em)
+
+We applied this final configuration to all our subsets, in grayscale and in color.
+
+=== 3 different sports or 3 similar sports
+
+#v(1em)
+
+These two subsets contain the same number of classes. The only difference is how similar the sports are, and this is the impact we wanted to compare.
+
+#figure(
+  image("Assets/color_3_diff.png", width: 85%),
+  caption: [3 different sports (football, nascar racing, olympic wrestling), in color.]
+)
+
+On the 3 different sports, the task is very easy for the model. In color, it recognizes the 15 validation images from epoch 5, and the accuracy quickly reaches 100 %.
+
+#figure(
+  image("Assets/color_3_sim.png", width: 85%),
+  caption: [3 similar sports (football, rugby, ampute football), in color.]
+)
+
+On the 3 similar sports, it is the opposite. The model seems to learn the training set by heart, but the validation loss barely decreases and quickly goes back up: the validation accuracy stays around 53 % in color. The model does not manage to distinguish classes that look alike.
+
+=== Grayscale or color
+
+#v(1em)
+
+We then take the example of the 6 different sports (football, nascar racing, olympic wrestling, surfing, archery, arm wrestling), and this is what we want to compare.
+
+#grid(
+  columns: 2,
+  gutter: 1em,
+  figure(
+    image("Assets/gray_6.png", width: 100%),
+    caption: [6 sports in grayscale.]
+  ),
+  figure(
+    image("Assets/color_6.png", width: 100%),
+    caption: [6 sports in color.]
+  ),
+)
+
+On these 6 sports, color improves the validation loss (0.51 in grayscale against 0.40 in color), but the accuracy is almost the same. These sports are already quite easy to distinguish in grayscale.
+
+The effect of color is much more visible when the task becomes harder, for example with 12 sports:
+
+#table(
+  columns: (1fr, 1fr, 1fr),
+  inset: 8pt,
+  align: horizon,
+  table.header([*12 sports*], [*Minimum validation loss*], [*Accuracy at the best epoch*]),
+  [Grayscale], [1.35], [52 %],
+  [Color], [0.87], [78 %],
+)
+
+Our hypothesis is verified: color helps the model in all our subsets. This makes sense for sports, where the color of the field, the water or the outfits gives important clues.
+
+=== A growing number of classes
+
+#v(1em)
+
+With 20 sports, the validation accuracy drops to 49 % in grayscale and 58 % in color. With the 100 sports, it drops to 22 % in grayscale and 34 % in color. We were delighted to see that even with 100 sports, our model reached 33 % accuracy.
+
+#figure(
+  image("Assets/100c_color_confusion.png", width: 65%),
+  caption: [100 sports in color: the diagonal is clearly visible, the model correctly recognizes part of the sports.]
+)
+
+However, the overfitting is very strong: the best validation loss is reached as early as epoch 4, and then it rises sharply.
+
+=== Summary
+
+#v(1em)
+
+#table(
+  columns: (1.4fr, 1fr, 1fr, 1fr, 1fr),
+  inset: 8pt,
+  align: horizon,
+  table.header(
+    [*Sports*], [*Random (1/n)*], [*Grayscale*], [*Color*], [*Validation images (5 × n)*]
+  ),
+  [3 similar], [33 %], [40 %], [53 %], [15],
+  [3 different], [33 %], [93 %], [100 %], [15],
+  [6 different], [17 %], [80 %], [83 %], [30],
+  [12], [8 %], [52 %], [78 %], [60],
+  [20], [5 %], [49 %], [58 %], [100],
+  [100], [1 %], [22 %], [34 %], [500],
+)
+
+_Validation accuracy at the epoch with the lowest validation loss. The "Random" column gives the accuracy of a model that would answer at random._
+
+== Difficulties encountered
+
+#v(1em)
+
+=== A first version that did not work
+
+#v(1em)
+
+The process described above is actually our second version. In the first one, we had added regularization (a weight decay of 0.1) before switching from SGD to Adam, and then kept this same value.
+
+The results were very bad: on 100 classes, the validation accuracy was about 1.6 %. The confusion matrices showed vertical lines: the model always predicted the same two or three classes, as if only a small part of the data was taken into account.
+
+We changed the order of the steps as presented in this report: first the MLP and the convolution, then the optimizer and the scheduler, and only at the end the regularization. This solved most of the problems.
+
+=== Other difficulties
+
+#v(1em)
+
+- The validation sets are small, which makes the accuracy very unstable from one epoch to another.
+
+- With 224×224 images, training takes a long time, which limits the number of possible experiments.
+
+- *A code error*: for all the experiments on 12 sports, we had written `num_classes=20`. The model therefore had 8 outputs that did not correspond to any sport. We fixed the error, but its impact was limited.
+
 
 = Conclusion
 
