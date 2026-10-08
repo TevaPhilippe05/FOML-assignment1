@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 
 from modules.architecture import Net
 from modules.utils import make_optimizer, make_scheduler
+from modules.plotting import plot_metrics
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
