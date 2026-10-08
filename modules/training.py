@@ -132,6 +132,6 @@ def run_training(train_dataset, val_dataset, num_classes, hidden_sizes=(64,), ac
     metrics = train(net, train_loader, val_loader, epochs=epochs, lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name, limit_epoch=limit_epoch)
 
     if pr: 
-        plot_metrics(metrics, [10, 20])
+        plot_metrics(metrics, [10, 20, 40], class_names=train_dataset.classes)
         
     return metrics, net

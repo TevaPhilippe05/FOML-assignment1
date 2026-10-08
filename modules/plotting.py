@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot_metrics(metrics, cm_epochs=()):
+def plot_metrics(metrics, cm_epochs=(), class_names=None):
     epochs = range(1, len(metrics["loss_train"]) + 1)
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4))
@@ -31,6 +31,9 @@ def plot_metrics(metrics, cm_epochs=()):
         cm = metrics["confusion_matrices"][index]
         plt.figure(figsize=(8, 8))
         plt.imshow(cm, cmap="Blues")
+        if class_names is not None:
+            plt.xticks(range(len(class_names)), class_names, rotation=90)
+            plt.yticks(range(len(class_names)), class_names)
         plt.colorbar()
         plt.title("Confusion matrix - epoch " + str(epoch))
         plt.xlabel("Predicted class")
