@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 import torch
 from sklearn.metrics import confusion_matrix
 from torch import nn
@@ -6,6 +7,7 @@ from torch.utils.data import DataLoader
 
 from modules.architecture import Net
 from modules.utils import make_optimizer, make_scheduler
+from modules.plotting import plot_metrics
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -27,7 +29,8 @@ def train(model, train_loader, val_loader, epochs=40, lr=0.001, optimizer_name="
     best_val_loss = float('inf')
     epoch_counter = 0
 
-    for epoch in range(epochs):
+    pbar = tqdm(range(epochs), desc="Training")
+    for epoch in pbar:
         
         model.train()
         total_loss, correct, total = 0.0, 0, 0
@@ -81,9 +84,10 @@ def train(model, train_loader, val_loader, epochs=40, lr=0.001, optimizer_name="
 
         if scheduler is not None:
             scheduler.step()
-            
-        print(f'Epoch [{epoch+1}/{epochs}], Train Loss: {train_losses[-1]:.4f}, '
-              f'Val Loss: {val_loss:.4f}, Val Acc: {val_accs[-1]:.4f}')
+
+        pbar.set_postfix({'Train Loss': f'{train_losses[-1]:.4f}',
+                          'Val Loss': f'{val_loss:.4f}',
+                          'Val Acc': f'{val_accs[-1]:.4f}'})
 
         
         if model.regularization == "early_stopping":
@@ -93,7 +97,7 @@ def train(model, train_loader, val_loader, epochs=40, lr=0.001, optimizer_name="
             else:
                 epoch_counter += 1
             if epoch_counter >= limit_epoch:
-                print(f"Early stopping at epoch {epoch+1}")
+                tqdm.write(f"Early stopping at epoch {epoch+1}")
                 break
 
     return {
