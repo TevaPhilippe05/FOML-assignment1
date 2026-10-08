@@ -27,39 +27,63 @@
 
 #v(1em)
 
-TODO
+The objective of this project is to analyze and compare the performance of
+different neural network models on an image classification dataset. In order to do this, we chose a dataset and performed a series of experiments.
 
 = Dataset Analysis
 
 #v(1em)
 
-The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. It includes 14492 images, divided into 100 different classes. The images are all 224x224 pixels, and they all use JPG format. The classes are not balanced, with a range in between 69 and 201 images.
+The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. A dataset thousands of images from different sports, in order to solve classification problems. 
 
-[Put class distribution image here]
+We decided to choose this specific dataset, because with 100 classes, we could pick and choose different amounts of classes based on our needs, but also test how the amount of classes has an impact in the model's hability to learn
 
-The dataset is distributed by default in three folders:
-- train/ has 13493 files
-- test/ has 500 files
-- valid/ has 500 files
-There is also a CSV file with basic information:
-
-[Put head() of dataframe]
-
-And additionally there is HDF5 file ('EfficientNetB0-100-(224 X 224)- 98.40.h5') that is not mentioned in the dataset documentation, but is asumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions.
-
-The author of the dataset claims that "This dataset was carefully created so that the region of interest (ROI) in this case the sport occupies approximately 50% of the pixels in the image. As a consequence even models of moderate complexity should achieve training and validation accuracies in the high 90's."
-
-Due to the amount of classes, we decided to remove some of them in order to carry out our analysis. We decided to test some different combinations:
-- 3 very different classes [which ones]
-- 3 similar classes [which ones]
-- 6 classes [which ones]
-- 100 classes??
-
-Class choice for each experiment was based on class distribution, prioriticing classese with higher amount of images.
+#figure(
+  image("output/sample_images.png", width: 65%),
+  caption: [Example of some of the images found in the dataset.]
+)
 
 == Data Quality & Characteristics
 
-== Class Specific Insights
+The dataset includes 14492 images, divided into 100 different classes. The main directory has three folders and two files:
+- `train/` has 13493 files
+- `test/` has 500 files
+- `valid/` has 500 files
+- `sports.csv`
+- `EfficientNetB0-100-(224 X 224)- 98.40.h5`
+
+The files in the three folders are all JPG images, and are equally sized (224x224 pixels). The class distribution is not balanced, with the biggest class (football) being 2.91 times bigger than the smallest class (sky surfing).
+
+#figure(
+  image("output/top_bottom_10_classes.png", width: 85%),
+  caption: [Class distribution (10 highest and 10 lowest) for the dataset.]
+)
+
+The CSV file (`sports.csv`) contains basic information for all the images:
+
+#let data = csv("output/head.csv")
+#align(center)[
+  #table(
+    columns: data.first().len(),
+    align: center + horizon,
+    ..data.first().map(h => strong(h)),
+    ..data.slice(1).flatten(),
+  )
+  #v(0.5em)
+  .head() of `sports.csv`.
+]
+
+And the HDF5 file (`EfficientNetB0-100-(224 X 224)- 98.40.h5`) is not mentioned in the dataset documentation, but is asumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions, but that goes beyond the scope of this project, so we are not going to use this file.
+
+The author of the dataset claims that "This dataset was carefully created so that the region of interest (ROI) in this case the sport occupies approximately 50% of the pixels in the image. As a consequence even models of moderate complexity should achieve training and validation accuracies in the high 90's."
+
+For our experiments, we decided to reduce the amount of classes in order to carry out our different analyses. We started with three different classes, and then tested some different combinations:
+- 3 very different classes, with the objective of creating an "starting point".
+- 3 similar classes, to test model's hability to learn finer details.
+- 6, 12 and 20 classes, to how the model handles more classes
+- The whole dataset (100 classes), to 'challenge' our model.
+
+\*Class choice for each experiment was based on class distribution, prioritizing classes with higher amount of images.
 
 = Model description
 
@@ -105,6 +129,7 @@ First, we selected 3 similar sports and 3 different sports.
     Ampute football (112 files)
   ],
 )
+_Table A : Sport choosen and number of files they contains_
 
 We also chose a subset of 6 different sports, then subsets of 12 and 20 sports, some of them different and some of them similar.
 
@@ -163,10 +188,6 @@ Note that the seed is set to 42 to ensure that the results are comparable.
 
 #v(1em)
 
-= Process and Analysis
-
-#v(1em)
-
 For the process, we looked for the ideal parameters on a subset of *12 sports in grayscale*, adding the elements one by one.
 
 Once these parameters were found, we applied them to our other subsets. The idea was to compare the behaviour of such a model on 3 different sports and on 3 similar sports, between the use of grayscale images and color images (we will see an example with 6 sports), and finally with a growing number of classes (20 and 100 sports).
@@ -191,6 +212,7 @@ We started without convolution, with SGD, a learning rate of 0.001 and 20 epochs
   [64, 32], [3.2 M], [2.18],
   [128, 64, 32], [6.4 M], [2.24],
 )
+_ Table B : Number of parameters and Loss in relation with the hiddens layers configuration_
 
 The results are very close. The models are still learning at the end of the 20 epochs. Our model was running on the GPU of the virtual machines, but given the number of images and parameters, it still took a long time to run. This is why we stayed at 20 epochs. We kept *two layers of 128 and 64 neurons*, a good compromise between results and number of parameters.
 
@@ -208,12 +230,13 @@ We then added a convolution layer (`Conv`), testing two filter sizes (3 and 7) a
   [3], [2.01], [1.95], [1.95],
   [7], [2.01], [1.90], [1.91],
 )
+_Table C : Loss in relation with kernel size and number of filters_
 
 The convolution improves the results compared to the MLP alone. Going from 8 to 16 filters helps a little, but not from 16 to 32. Kernels of 3 and 7 give very similar results. However, the number of parameters increases very quickly with the number of filters (12.9 M with 8 filters, 25.7 M with 16, 51.4 M with 32). We therefore kept *8 filters and a kernel of 3* to stay at 12.9 M parameters.
 
 We also compared *max pooling* and *average pooling*, which were equivalent, and then the activation functions: ReLU (2.01) and tanh (1.99) give almost identical results, while sigmoid learns nothing (the loss stays at the level of a model answering at random). We kept max pooling and ReLU.
 
-Given the results, we could have kept tanh, but we know from theory that ReLU is better, so we preferred not to take any risks.
+Given the results, we could have kept tanh, but we know from theory that ReLU is better, so we prefered not to take any risks.
 
 == Optimizer and scheduler
 
@@ -229,8 +252,10 @@ We replaced SGD with Adam, which adapts the weights, with the step scheduler, wh
   align: horizon,
   table.header([*Configuration*], [*Minimum validation loss*], [*Validation accuracy (end)*]),
   [SGD], [1.86], [about 33 %],
-  [Adam + scheduler], [1.64], [about 50 %],
+  [Adam + scheduler step], [1.64], [about 50 %],
 )
+_Table D : Loss and accuracy in relation with Optimiser and Scheduler_
+
 
 The improvement is clear, and the validation loss is much more stable at the end of training, which matches the expected effect of the scheduler.
 
@@ -257,7 +282,11 @@ The model still overfits: it reaches almost 100 % on the training set, but about
   [Weight decay], [0.1], [2.08],
   [Dropout], [0.1], [1.78],
   [Dropout], [0.3], [2.13],
+  [L1], [0.00005], [1.82],
+  [L1], [0.0001], [1.90],
+  [L1], [0.0003], [2.01],
 )
+_Table E : Value applied for each regularization and Loss got_
 
 No regularization really improves the model, or only very slightly. With stronger values, the gap between training and validation decreases, but the model learns less well, and with 0.1 or a dropout of 0.3, we turned overfitting into underfitting. Dropout leads to the same conclusion as weight decay.
 
@@ -340,6 +369,8 @@ The effect of color is much more visible when the task becomes harder, for examp
   [Color], [0.87], [78 %],
 )
 
+_Table F : Loss and accuracy got between grayscale and color dattaset for 12 sport dataset _
+
 Our hypothesis is verified: color helps the model in all our subsets. This makes sense for sports, where the color of the field, the water or the outfits gives important clues.
 
 === A growing number of classes
@@ -349,8 +380,8 @@ Our hypothesis is verified: color helps the model in all our subsets. This makes
 With 20 sports, the validation accuracy drops to 49 % in grayscale and 58 % in color. With the 100 sports, it drops to 22 % in grayscale and 34 % in color. We were delighted to see that even with 100 sports, our model reached 33 % accuracy.
 
 #figure(
-  image("Assets/100c_color_confusion.png", width: 65%),
-  caption: [100 sports in color: the diagonal is clearly visible, the model correctly recognizes part of the sports.]
+  image("Assets/20c_color_confusion.png", width: 65%),
+  caption: [20 sports in color: the diagonal is clearly visible, the model correctly recognizes part of the sports.]
 )
 
 However, the overfitting is very strong: the best validation loss is reached as early as epoch 4, and then it rises sharply.
@@ -374,7 +405,7 @@ However, the overfitting is very strong: the best validation loss is reached as 
   [100], [1 %], [22 %], [34 %], [500],
 )
 
-_Validation accuracy at the epoch with the lowest validation loss. The "Random" column gives the accuracy of a model that would answer at random._
+_Table G : Validation accuracy at the epoch with the lowest validation loss. The "Random" column gives the accuracy of a model that would answer at random._
 
 == Difficulties encountered
 
