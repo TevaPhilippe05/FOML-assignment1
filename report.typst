@@ -186,6 +186,8 @@ Note that the seed is set to 42 to ensure that the results are comparable.
 
 #v(1em)
 
+Before everything, please note that we used here seed 42. To compensate for the poor data split—with only 5 validation images—we decided to train our model on three seeds: 35, 38, and 42. We reached the same conclusions; the differences were minor, and the results supported our conclusions.
+
 For the process, we looked for the ideal parameters on a subset of *12 sports in grayscale*, adding the elements one by one.
 
 Once these parameters were found, we applied them to our other subsets. The idea was to compare the behaviour of such a model on 3 different sports and on 3 similar sports, between the use of grayscale images and color images (we will see an example with 6 sports), and finally with a growing number of classes (20 and 100 sports).
