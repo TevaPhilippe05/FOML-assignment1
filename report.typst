@@ -32,9 +32,9 @@ The objective of this project is to analyze and compare the performance of a neu
 
 #v(1em)
 
-The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. A dataset thousands of images from different sports, in order to solve classification problems. 
+The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. A dataset of thousands of images from different sports, in order to solve classification problems. 
 
-We decided to choose this specific dataset, because with 100 classes, we could pick and choose different amounts of classes based on our needs, but also test how the amount of classes has an impact in the model's hability to learn
+We decided to choose this specific dataset, because with 100 classes, we could pick and choose different amounts of classes based on our needs, but also test how the amount of classes has an impact on the model's ability to learn
 
 #figure(
   image("output/sample_images.png", width: 65%),
@@ -71,17 +71,17 @@ The CSV file (`sports.csv`) contains basic information for all the images:
   .head() of `sports.csv`.
 ]
 
-And the HDF5 file (`EfficientNetB0-100-(224 X 224)- 98.40.h5`) is not mentioned in the dataset documentation, but is asumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions, but that goes beyond the scope of this project, so we are not going to use this file.
+And the HDF5 file (`EfficientNetB0-100-(224 X 224)- 98.40.h5`) is not mentioned in the dataset documentation, but is assumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions, but that goes beyond the scope of this project, so we are not going to use this file.
 
 The author of the dataset claims that "This dataset was carefully created so that the region of interest (ROI) in this case the sport occupies approximately 50% of the pixels in the image. As a consequence even models of moderate complexity should achieve training and validation accuracies in the high 90's."
 
 For our experiments, we decided to reduce the amount of classes in order to carry out our different analyses. We started with three different classes, and then tested some different combinations:
 - 3 very different classes, with the objective of creating an "starting point".
-- 3 similar classes, to test model's hability to learn finer details.
-- 6, 12 and 20 classes, to how the model handles more classes
+- 3 similar classes, to test model's ability to learn finer details.
+- 6, 12 and 20 classes, to see how the model handles more classes
 - The whole dataset (100 classes), to 'challenge' our model.
 
-\*Class choice for each experiment was based on class distribution, prioritizing classes with higher amount of images.
+\*Class choice for each experiment was based on class distribution, prioritizing classes with higher number of images.
 
 = Model description
 
@@ -186,11 +186,13 @@ Note that the seed is set to 42 to ensure that the results are comparable.
 
 #v(1em)
 
+Before everything, please note that we used here seed 42. To compensate for the poor data split—with only 5 validation images—we decided to train our model on three seeds: 35, 38, and 42. We reached the same conclusions; the differences were minor, and the results supported our conclusions.
+
 For the process, we looked for the ideal parameters on a subset of *12 sports in grayscale*, adding the elements one by one.
 
 Once these parameters were found, we applied them to our other subsets. The idea was to compare the behaviour of such a model on 3 different sports and on 3 similar sports, between the use of grayscale images and color images (we will see an example with 6 sports), and finally with a growing number of classes (20 and 100 sports).
 
-To compare two models, we mainly look at the *validation loss*. The validation accuracy is computed on few images (5 images per class): it therefore varies a lot from one epoch to another.
+To compare two models, we mainly look at the *validation loss*. The validation accuracy is computed on a few images (5 images per class): it therefore varies a lot from one epoch to another.
 
 == Choice of the hidden layers
 
@@ -234,7 +236,7 @@ The convolution improves the results compared to the MLP alone. Going from 8 to 
 
 We also compared *max pooling* and *average pooling*, which were equivalent, and then the activation functions: ReLU (2.01) and tanh (1.99) give almost identical results, while sigmoid learns nothing (the loss stays at the level of a model answering at random). We kept max pooling and ReLU.
 
-Given the results, we could have kept tanh, but we know from theory that ReLU is better, so we prefered not to take any risks.
+Given the results, we could have kept tanh, but we know from theory that ReLU is better, so we preferred not to take any risks.
 
 == Optimizer and scheduler
 
@@ -252,7 +254,7 @@ We replaced SGD with Adam, which adapts the weights, with the step scheduler, wh
   [SGD], [1.86], [about 33 %],
   [Adam + scheduler step], [1.64], [about 50 %],
 )
-_Table D : Loss and accuracy in relation with Optimiser and Scheduler_
+_Table D : Loss and accuracy in relation with Optimizer and Scheduler_
 
 
 The improvement is clear, and the validation loss is much more stable at the end of training, which matches the expected effect of the scheduler.
@@ -284,7 +286,7 @@ The model still overfits: it reaches almost 100 % on the training set, but about
   [L1], [0.0001], [1.90],
   [L1], [0.0003], [2.01],
 )
-_Table E : Value applied for each regularization and Loss got_
+_Table E : Value applied for each regularization and Loss obtained_
 
 No regularization really improves the model, or only very slightly. With stronger values, the gap between training and validation decreases, but the model learns less well, and with 0.1 or a dropout of 0.3, we turned overfitting into underfitting. Dropout leads to the same conclusion as weight decay.
 
@@ -367,7 +369,7 @@ The effect of color is much more visible when the task becomes harder, for examp
   [Color], [0.87], [78 %],
 )
 
-_Table F : Loss and accuracy got between grayscale and color dattaset for 12 sport dataset _
+_Table F : Loss and accuracy got between grayscale and color dataset for 12 sports dataset _
 
 Our hypothesis is verified: color helps the model in all our subsets. This makes sense for sports, where the color of the field, the water or the outfits gives important clues.
 
@@ -375,7 +377,7 @@ Our hypothesis is verified: color helps the model in all our subsets. This makes
 
 #v(1em)
 
-With 20 sports, the validation accuracy drops to 49 % in grayscale and 58 % in color. With the 100 sports, it drops to 22 % in grayscale and 34 % in color. We were delighted to see that even with 100 sports, our model reached 33 % accuracy.
+With 20 sports, the validation accuracy drops to 49 % in grayscale and 58 % in color. With the 100 sports, it drops to 22 % in grayscale and 34 % in color. We were delighted to see that even with 100 sports, our model reached 34 % accuracy.
 
 #figure(
   image("Assets/20c_color_confusion.png", width: 65%),
@@ -430,8 +432,12 @@ We changed the order of the steps as presented in this report: first the MLP and
 - *A code error*: for all the experiments on 12 sports, we had written `num_classes=20`. The model therefore had 8 outputs that did not correspond to any sport. We fixed the error, but its impact was limited.
 
 
-= Conclusion
+= Conclusions
 
 #v(1em)
 
-TODO by alvaro
+- In terms of similar vs different sports: We saw that distinguishing very similar-looking classes is not a simple task. Our model seems unable to perform this task with confidence, as opposed to more different-looking classes, where the model performs with no issues.
+
+- In terms of color: Switching to full color gave a substantial improvement. Grayscale discards chromatic information (hue and saturation), which removes cues that help distinguish classes and provides scene-level context, such as the green of a football pitch or the blue of water in water sports. The network can partially recover this from shape and texture, but not entirely, which is consistent with the gap we observed.
+
+- In terms of class number: The challenge grows with the number of classes for two reasons. On one hand, just by increasing the number of classes, we increase the complexity of the problem (the chance of randomly guessing decreases). On the other hand, some of the classes we are adding are very similar to each other, and as we saw in our experiments, that also has an impact on the model’s ability to predict with confidence.
