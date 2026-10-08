@@ -106,7 +106,7 @@ def train(model, train_loader, val_loader, epochs=40, lr=0.001, optimizer_name="
     }
 
 def run_training(train_dataset, val_dataset, num_classes, hidden_sizes=(64,), activation_function="relu", regularization=None, reg_param=0.0,
-                 optimizer_name="SGD", scheduler_name=None, epochs=40, lr=0.001, batch_size=64, limit_epoch=10, seed=42, convolution=None, in_channels=None, out_channels=None, kernel_size=None, pooling=None):
+                 optimizer_name="SGD", scheduler_name=None, epochs=40, lr=0.001, batch_size=64, limit_epoch=10, seed=42, convolution=None, in_channels=None, out_channels=None, kernel_size=None, pooling=None, pr=False):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
@@ -127,4 +127,7 @@ def run_training(train_dataset, val_dataset, num_classes, hidden_sizes=(64,), ac
 
     metrics = train(net, train_loader, val_loader, epochs=epochs, lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name, limit_epoch=limit_epoch)
 
+    if pr: 
+        plot_metrics(metrics, [10, 20])
+        
     return metrics, net
