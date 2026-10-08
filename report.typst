@@ -27,9 +27,7 @@
 
 #v(1em)
 
-The objective of this project is to analyze and compare the performance of
-different neural network models on an image classification dataset. In order to do this, we chose a dataset and performed a series of experiments.
-
+The objective of this project is to analyze and compare the performance of a neural network on an image classification dataset. We first built a fully connected network (MLP), then improved it by adding convolution layers, and looked for the best parameters for our model (hidden layers, convolution, activation function, optimizer, scheduler and regularization). Finally, we used this model to analyze how it behaves on different and similar sports, on color and grayscale images, and on a growing number of classes.
 = Dataset Analysis
 
 #v(1em)
@@ -436,4 +434,4 @@ We changed the order of the steps as presented in this report: first the MLP and
 
 #v(1em)
 
-TODO
+TODO by alvaro
