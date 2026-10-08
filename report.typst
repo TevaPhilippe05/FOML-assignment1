@@ -27,39 +27,63 @@
 
 #v(1em)
 
-TODO
+The objective of this project is to analyze and compare the performance of
+different neural network models on an image classification dataset. In order to do this, we chose a dataset and performed a series of experiments.
 
 = Dataset Analysis
 
 #v(1em)
 
-The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. It includes 14492 images, divided into 100 different classes. The images are all 224x224 pixels, and they all use JPG format. The classes are not balanced, with a range in between 69 and 201 images.
+The dataset we are using for this project is the #link("https://www.kaggle.com/datasets/gpiosenka/sports-classification")[100 Sports Image Classification] dataset. A dataset thousands of images from different sports, in order to solve classification problems. 
 
-[Put class distribution image here]
+We decided to choose this specific dataset, because with 100 classes, we could pick and choose different amounts of classes based on our needs, but also test how the amount of classes has an impact in the model's hability to learn
 
-The dataset is distributed by default in three folders:
-- train/ has 13493 files
-- test/ has 500 files
-- valid/ has 500 files
-There is also a CSV file with basic information:
-
-[Put head() of dataframe]
-
-And additionally there is HDF5 file ('EfficientNetB0-100-(224 X 224)- 98.40.h5') that is not mentioned in the dataset documentation, but is asumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions.
-
-The author of the dataset claims that "This dataset was carefully created so that the region of interest (ROI) in this case the sport occupies approximately 50% of the pixels in the image. As a consequence even models of moderate complexity should achieve training and validation accuracies in the high 90's."
-
-Due to the amount of classes, we decided to remove some of them in order to carry out our analysis. We decided to test some different combinations:
-- 3 very different classes [which ones]
-- 3 similar classes [which ones]
-- 6 classes [which ones]
-- 100 classes??
-
-Class choice for each experiment was based on class distribution, prioriticing classese with higher amount of images.
+#figure(
+  image("output/sample_images.png", width: 65%),
+  caption: [Example of some of the images found in the dataset.]
+)
 
 == Data Quality & Characteristics
 
-== Class Specific Insights
+The dataset includes 14492 images, divided into 100 different classes. The main directory has three folders and two files:
+- `train/` has 13493 files
+- `test/` has 500 files
+- `valid/` has 500 files
+- `sports.csv`
+- `EfficientNetB0-100-(224 X 224)- 98.40.h5`
+
+The files in the three folders are all JPG images, and are equally sized (224x224 pixels). The class distribution is not balanced, with the biggest class (football) being 2.91 times bigger than the smallest class (sky surfing).
+
+#figure(
+  image("output/top_bottom_10_classes.png", width: 85%),
+  caption: [Class distribution (10 highest and 10 lowest) for the dataset.]
+)
+
+The CSV file (`sports.csv`) contains basic information for all the images:
+
+#let data = csv("output/head.csv")
+#align(center)[
+  #table(
+    columns: data.first().len(),
+    align: center + horizon,
+    ..data.first().map(h => strong(h)),
+    ..data.slice(1).flatten(),
+  )
+  #v(0.5em)
+  .head() of `sports.csv`.
+]
+
+And the HDF5 file (`EfficientNetB0-100-(224 X 224)- 98.40.h5`) is not mentioned in the dataset documentation, but is asumed to be a pre-trained model that can be used for tasks such as transfer learning or quick predictions, but that goes beyond the scope of this project, so we are not going to use this file.
+
+The author of the dataset claims that "This dataset was carefully created so that the region of interest (ROI) in this case the sport occupies approximately 50% of the pixels in the image. As a consequence even models of moderate complexity should achieve training and validation accuracies in the high 90's."
+
+For our experiments, we decided to reduce the amount of classes in order to carry out our different analyses. We started with three different classes, and then tested some different combinations:
+- 3 very different classes, with the objective of creating an "starting point".
+- 3 similar classes, to test model's hability to learn finer details.
+- 6, 12 and 20 classes, to how the model handles more classes
+- The whole dataset (100 classes), to 'challenge' our model.
+
+\*Class choice for each experiment was based on class distribution, prioritizing classes with higher amount of images.
 
 = Model description
 
